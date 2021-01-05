@@ -25,7 +25,7 @@ SECRET_KEY = '2^ditpu$p+)@es-_g7j#yxt%d(3+a3okend#0260_p_wq_1-cl'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'leaflet',
     'shops.apps.ShopsConfig',
 ]
 
@@ -77,11 +78,14 @@ WSGI_APPLICATION = 'printed.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'gis',
+        'USER': 'user001',
+        'PASSWORD': '123456789',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -122,24 +126,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
+    # os.path.join(BASE_DIR, 'static')
 ]
-
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR,'static/media')
-
-## GIS SETUP
-# try:
-#     import gdal
-#     gdal_path = Path(gdal.__file__)
-#     OSGEO4W = os.path.join(gdal_path.parent, 'osgeo')
-#     os.environ["OSGEO4W_ROOT"] = OSGEO4W
-#     os.environ["GDAL_DATA"] = os.path.join(OSGEO4W, "data", "gdal")
-#     os.environ["PROJ_LIB"] = os.path.join(OSGEO4W, "data", "proj")
-#     os.environ["PATH"] = OSGEO4W + ";" + os.environ["PATH"]
-#     GEOS_LIBRARY_PATH = str(os.path.join(OSGEO4W, "geos_c.dll"))
-#     GDAL_LIBRARY_PATH = str(os.path.join(OSGEO4W, "gdal301.dll"))
-# except ImportError:
-#     GEOS_LIBRARY_PATH = None
-#     GDAL_LIBRARY_PATH = None
