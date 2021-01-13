@@ -15,7 +15,7 @@ def file_name(instance, filename):
     return os.path.join('uploads', filename)
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
+    user = models.OneToOneField(User,primary_key=True, on_delete=models.CASCADE,related_name='profile')
     is_owner = models.BooleanField(default=False)
 
     def __str__(self):
@@ -36,6 +36,10 @@ class Type(models.Model):
 
     def __str__(self):
         return self.name
+
+
+SIZE_CHOICES = (("A4","A4"),("A3","A3"),('A2','A2'))
+STATUS_CHOICES = (("On Queue","On Queue"),("Proccessing","Proccessing"),('Finished','Finished'),('Recieved','Recieved'))
 
 class Order(models.Model):
     uuid = ShortUUIDField(primary_key=True)
@@ -58,9 +62,8 @@ class Order(models.Model):
     @property
     def pages(self):
         pdf = PyPDF2.PdfFileReader(self.docfile)
-        return pdf.getNumPages()     
-    SIZE_CHOICES = (("A4","A4"),("A3","A3"),('A2','A2'))
-    STATUS_CHOICES = (("On Queue","On Queue"),("Proccessing","Proccessing"),('Finished','Finished'),('Recieved','Recieved'))
+        return pdf.getNumPages()  
+           
     notes = models.TextField(blank=True,max_length=300, default='')
     size = models.CharField(max_length=9,
                   choices=SIZE_CHOICES,
@@ -74,4 +77,7 @@ class Order(models.Model):
 
     def __str__(self):
         return str(self.uuid)
+
+    class Meta:
+        ordering = ['date']
 
