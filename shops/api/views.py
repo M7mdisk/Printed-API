@@ -31,14 +31,10 @@ def usef_list(request):
     serializer_class = UserSerializer
 
 
-# class UserDetail(generics.RetrieveAPIView):
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
-@csrf_exempt
 @api_view(["POST","GET"])
 def order_list(request):
     """
-    List all code orders, or create a new order.
+    List all orders, or create a new order.
     """
     if request.method == 'GET':
         orders = Order.objects.all()
@@ -60,10 +56,10 @@ def order_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 
-@csrf_exempt
+@api_view(["GET","PUT","DELETE"])
 def order_detail(request, pk):
     """
-    Retrieve, update or delete a code order.
+    Retrieve, update or delete order.
     """
     try:
         order = Order.objects.get(pk=pk)
