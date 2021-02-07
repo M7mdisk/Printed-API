@@ -8,8 +8,12 @@ from django.contrib.auth.models import User
 
 from shops.models import Order, Profile
 from .serializers import OrderSerializer, ProfileSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
 
 @api_view(["GET","POST"])
+@permission_classes([IsAuthenticated])
 def profile_view(request):
     
     if request.method == "POST":
@@ -34,10 +38,11 @@ def usef_list(request):
 @api_view(["POST","GET"])
 def order_list(request):
     """
-    List all orders, or create a new order.
+    For Users.
+    List all Customer Orders, or create a new order.
     """
     if request.method == 'GET':
-        orders = Order.objects.all()
+        orders = Order.objects.filter(buyer=request.user.profile)
         serializer = OrderSerializer(orders, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -48,7 +53,12 @@ def order_list(request):
         # except:
         #     return HttpResponse(status=400)
         # data = JSONParser().parse(request)
-        serializer = OrderSerializer(data=request.data,context={'request':request})
+        data = request.data
+        _mutable = data._mutable
+        data._mutable = True
+        data['buyer'] = request.user.id
+        data._mutable = _mutable
+        serializer = OrderSerializer(data=data)
 
         if serializer.is_valid():
             serializer.save()
@@ -57,6 +67,7 @@ def order_list(request):
 
 
 @api_view(["GET","PUT","DELETE"])
+@permission_classes([IsAuthenticated])
 def order_detail(request, pk):
     """
     Retrieve, update or delete order.
