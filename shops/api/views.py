@@ -1,15 +1,20 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import ListModelMixin
+from rest_framework.status import HTTP_200_OK
+from rest_framework.permissions import IsAuthenticated
+
+
 
 from shops.models import Order, Profile
 from .serializers import OrderSerializer, ProfileSerializer
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+
 
 
 @api_view(["GET","POST"])
@@ -30,9 +35,14 @@ def profile_view(request):
         serializer = ProfileSerializer(profiles, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-def usef_list(request):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_profile_view(request):
+    if request.method == 'GET':
+        profiles = Profile.objects.filter(user=request.user).first()
+        serializer = ProfileSerializer(profiles, context={'request': request})
+        return JsonResponse(serializer.data, safe=False)
+
 
 
 @api_view(["POST","GET"])
@@ -92,3 +102,19 @@ def order_detail(request, pk):
     elif request.method == 'DELETE':
         order.delete()
         return HttpResponse(status=204)
+
+
+class PingViewSet(GenericViewSet, ListModelMixin):
+    """
+    Helpful class for internal health checks
+    for when your server deploys. Typical of AWS
+    applications behind ALB which does default 30
+    second ping/health checks.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        return Response(
+            data={"id": request.GET.get("id")},
+            status=HTTP_200_OK
+        )
