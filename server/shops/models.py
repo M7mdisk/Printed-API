@@ -14,9 +14,19 @@ def file_name(instance, filename):
     filename = "media/%s/%s_%s.%s" % (instance.shop.name,instance.shop.name,instance.uuid, ext)
     return os.path.join('uploads', filename)
 
+def pic_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "media/profile_%s.%s" % (instance.user.id, ext)
+    return os.path.join('uploads', filename)
+
 class Profile(models.Model):
     user = models.OneToOneField(User,primary_key=True, on_delete=models.CASCADE,related_name='profile')
     is_owner = models.BooleanField(default=False)
+    avatar = models.ImageField(upload_to=pic_name,default="default_avatar.jpg")
+
+    @property
+    def avatar_url(self):
+        return self.avatar.url
 
     def __str__(self):
         return f'{self.user.username} Profile'

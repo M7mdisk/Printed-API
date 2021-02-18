@@ -7,12 +7,19 @@ class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source = 'user.email')
     first_name = serializers.CharField(source = 'user.first_name')
     last_name = serializers.CharField(source = 'user.last_name')
+    photo_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['username','email', 'first_name','last_name','password', 'is_owner']
+        fields = ['username','email','photo_url', 'first_name','last_name','password', 'is_owner']
         extra_kwargs = {
             'password': {"write_only":True}
         }
+
+    def get_photo_url(self, profile):
+        request = self.context.get('request')
+        photo_url = profile.avatar.url
+        return request.build_absolute_uri(photo_url)
+
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user = User.objects.create(**user_data)
