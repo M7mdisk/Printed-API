@@ -1,8 +1,11 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from shops.models import Profile, Order,  Shop
 from django.contrib.auth.models import User
 class ProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source = 'user.username',)
+    id = serializers.CharField(source = 'user.id',read_only=True)
+    username = serializers.CharField(source = 'user.username',validators=[UnicodeUsernameValidator(),UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(source = 'user.password', write_only = True)
     email = serializers.CharField(source = 'user.email')
     first_name = serializers.CharField(source = 'user.first_name')
@@ -10,7 +13,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['username','email','photo_url', 'first_name','last_name','password', 'is_owner']
+        fields = ['id','username','email','photo_url', 'first_name','last_name','password', 'is_owner']
         extra_kwargs = {
             'password': {"write_only":True}
         }
@@ -33,8 +36,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     #         is_owner = self.validate_data['is_owner']
     #     )
 
+class  ProfileUsingUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Profile
+        fields = ['*']
+
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['uuid', 'buyer', 'date', 'docfile',
         'quantity', 'type', 'shop', 'total','pages', 'extension']
+

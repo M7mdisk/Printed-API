@@ -9,6 +9,8 @@ urlpatterns = [
     path('orders/', views.order_list),
     path('orders/<str:pk>/', views.order_detail),
     path('accounts/',views.profile_view,),
-    path('myaccount/',views.my_profile_view,)
+    path('myaccount/',views.my_profile_view,),
+    path('userexists/',views.UserExistsView.as_view(),name='User exists check')
+
 
 ]

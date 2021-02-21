@@ -1,5 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
@@ -22,7 +24,7 @@ from .serializers import OrderSerializer, ProfileSerializer
 def profile_view(request):
     
     if request.method == "POST":
-        serializer = ProfileSerializer(data=request.data)
+        serializer = ProfileSerializer(data=request.data,context={'request':request})
         data = {}
         if serializer.is_valid():
             account = serializer.save()
@@ -32,8 +34,8 @@ def profile_view(request):
         return Response(serializer.errors)        
     if request.method == 'GET':
         profiles = Profile.objects.all()
-        serializer = ProfileSerializer(profiles, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        serializer = ProfileSerializer(profiles,context={'request':request}, many=True)
+        return JsonResponse(serializer.data,safe=False)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -118,3 +120,19 @@ class PingViewSet(GenericViewSet, ListModelMixin):
             data={"id": request.GET.get("id")},
             status=HTTP_200_OK
         )
+
+
+class UserExistsView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        # use this if username is in url kwargs
+        username = self.kwargs.get('username') 
+
+        # use this if username is being sent as a query parameter
+        username = self.request.query_params.get('username')  
+        try:
+            user = User.objects.get(username=username) # retrieve the user using username
+        except User.DoesNotExist:
+            return Response(data={'message':False}) # return false as user does not exist
+        else:
+            return Response(data={'message':True}) # Otherwise, return True
